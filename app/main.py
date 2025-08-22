@@ -1,8 +1,10 @@
-from typing import List
+class AliveAnimals(list):
+    def __repr__(self) -> str:
+        return "[" + ", ".join(repr(animal) for animal in self) + "]"
 
 
 class Animal:
-    alive: List["Animal"] = []
+    alive = AliveAnimals()
 
     def __init__(
             self,
@@ -21,9 +23,15 @@ class Animal:
             f"Hidden: {self.hidden}}}"
         )
 
-    @classmethod
-    def alive_repr(cls) -> str:
-        return "[" + ", ".join(repr(animal) for animal in cls.alive) + "]"
+    @property
+    def health(self) -> int:
+        return self._health
+
+    @health.setter
+    def health(self, value: int) -> None:
+        self._health = max(0, value)
+        if self._health == 0 and self in Animal.alive:
+            Animal.alive.remove(self)
 
 
 class Herbivore(Animal):
@@ -35,7 +43,4 @@ class Carnivore(Animal):
     def bite(self, herbi: Herbivore) -> None:
         if not isinstance(herbi, Herbivore) or herbi.hidden:
             return
-        herbi.health = max(herbi.health - 50, 0)
-        if herbi.health == 0:
-            if herbi in Animal.alive:
-                Animal.alive.remove(herbi)
+        herbi.health -= 50
