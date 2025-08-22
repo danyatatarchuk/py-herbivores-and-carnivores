@@ -1,13 +1,18 @@
+from typing import List
+
+
 class Animal:
-    alive = []
+    alive: List["Animal"] = []
 
     def __init__(
-            self, name: str, health: int = 100, hidden: bool = False
+            self,
+            name: str,
+            health: int = 100,
+            hidden: bool = False,
     ) -> None:
         self.name = name
         self.health = health
         self.hidden = hidden
-        self.alive = True
         Animal.alive.append(self)
 
     def __repr__(self) -> str:
@@ -15,6 +20,10 @@ class Animal:
             f"{{Name: {self.name}, Health: {self.health}, "
             f"Hidden: {self.hidden}}}"
         )
+
+    @classmethod
+    def alive_repr(cls) -> str:
+        return "[" + ", ".join(repr(animal) for animal in cls.alive) + "]"
 
 
 class Herbivore(Animal):
@@ -24,8 +33,9 @@ class Herbivore(Animal):
 
 class Carnivore(Animal):
     def bite(self, herbi: Herbivore) -> None:
-        if not herbi.hidden and isinstance(herbi, Herbivore):
-            herbi.health -= 50
-        if herbi.health <= 0:
+        if not isinstance(herbi, Herbivore) or herbi.hidden:
+            return
+        herbi.health = max(herbi.health - 50, 0)
+        if herbi.health == 0:
             if herbi in Animal.alive:
                 Animal.alive.remove(herbi)
